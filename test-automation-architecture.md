@@ -14,73 +14,33 @@ This document describes the architecture for an automated testing service that t
 
 ```mermaid
 graph TB
-    Client[Client<br/>Web UI/CLI]
+    Client[Client<br/>Web UI/CLI/Scripts]
     SSO[SSO Service<br/>Authentication]
     TestAuto[Test-Auto Service<br/>Main Service]
     Glean[Glean Service<br/>Chat API]
     
-    Client -->|<1. Test Request| TestAuto
-    TestAuto -->|<2. Authenticate| SSO
-    SSO -->|<3. Token/User Info| TestAuto
+    Client -->|<1. Test Authenticate| SSO
+    SSO -->|<2. SSO token | Client
+    Client -->|<3. Test Request| TestAuto
     TestAuto -->|"<4. Chat Requests<br/>(as test users)"| Glean
     Glean -->|<5. Responses| TestAuto
     TestAuto -->|<6. Results| Client
-    
-    subgraph "Test-Auto Service Components"
-        Auth[Authorization Module]
-        Executor[Test Executor]
-        Collector[Result Collector]
-        Config[Configuration Manager]
-    end
 ```
 
 ## Component Details
 
 ### Client
-- **Purpose**: Interface for authorized users to trigger tests
-- **Types**: Web UI or CLI or Python app
-- **Functions**:
-  - Submit test requests with user lists and questions
-  - Display/download test results
-  - Authenticate with SSO
+- authenticate test operator and get SSO token
+- call Test-Auto Service to perform tests
 
 ### SSO Service
-- **Purpose**: Handle authentication for all users
-- **Functions**:
-  - Authenticate request users
-  - Manage user tokens
-  - Provide user information to Test-Auto service
+- Handle authentication and return SSO token
 
 ### Test-Auto Service
-Main orchestration service with the following modules:
-
-##### Authorization Module
-- Validate request user against test-request allowlist (4 users)
-- Validate test user list against test users allowlist (20 users)
-- Validate questions against approved question list (30 questions)
-
-##### Test Executor
-- Loop through each test user
-- For each test user, use GLEAN_API_TOKEN to call `/rest/api/v1/createauthtoken` to get user-specific auth token
-- Loop through each question for each user
-- Make chat API calls to Glean service using the user-specific glean_auth_token
-- Handle rate limiting and error scenarios
-
-##### Result Collector
-- Collect all responses from Glean API
-- Format results for Excel export
-- Generate summary statistics
-
-##### Configuration Manager
-- Manage allowlists for users and questions
-- Handle service configuration updates
+- Main orchestration service with the following modules:
 
 ### Glean Service
-- **Purpose**: Provide chat API functionality
-- **Functions**:
-  - Process chat requests
-  - Return AI-generated responses
-  - Handle user authentication/authorization
+- Service be tested
 
 ## Authentication & Authorization Flow
 
@@ -91,9 +51,10 @@ sequenceDiagram
     participant SSO as SSO Service
     participant G as Glean Service
     
+    C->>SSO: Authenticate Request User
+    SSO->>C: SSO Token
     C->>TA: Test Request (users, questions)
-    TA->>SSO: Authenticate Request User
-    SSO->>TA: User Token & Info
+    TA->>TA: Authenticate
     
     alt Authorization Checks
         TA->>TA: Check request user in allowlist
@@ -103,52 +64,15 @@ sequenceDiagram
         TA->>C: Error: Unauthorized
     end
     
-    TA->>TA: Start Test Execution
-    
     loop For each test user
         TA->>G: POST /rest/api/v1/createauthtoken (with GLEAN_API_TOKEN, act as test user)
         G->>TA: glean_auth_token for test user
         loop For each question
             TA->>G: Chat API Call (with glean_auth_token, question)
             G->>TA: Response
-            TA->>TA: Store Result
         end
     end
-    
-    TA->>TA: Aggregate Results
     TA->>C: Test Results (Excel format)
-```
-
-## Test Execution Workflow
-
-```mermaid
-flowchart TD
-    Start([Start Test]) --> GetUsers[Get Test User List]
-    GetUsers --> ValidateUsers{Validate Users}
-    ValidateUsers -->|Invalid| Error1[Return Error]
-    ValidateUsers -->|Valid| GetQuestions[Get Question List]
-    
-    GetQuestions --> ValidateQuestions{Validate Questions}
-    ValidateQuestions -->|Invalid| Error2[Return Error]
-    ValidateQuestions -->|Valid| InitResults[Initialize Results Collection]
-    
-    InitResults --> LoopUsers[For Each Test User]
-    LoopUsers --> CreateToken[Call /rest/api/v1/createauthtoken<br/>with GLEAN_API_TOKEN]
-    CreateToken --> GetAuthToken[Get glean_auth_token<br/>for test user]
-    GetAuthToken --> LoopQuestions[For Each Question]
-    LoopQuestions --> CallAPI[Call Glean Chat API<br/>with glean_auth_token]
-    CallAPI --> StoreResult[Store Result]
-    
-    StoreResult --> MoreQuestions{More Questions?}
-    MoreQuestions -->|Yes| LoopQuestions
-    MoreQuestions -->|No| MoreUsers{More Users?}
-    
-    MoreUsers -->|Yes| LoopUsers
-    MoreUsers -->|No| AggregateResults[Aggregate All Results]
-    
-    AggregateResults --> FormatExcel[Format for Excel Export]
-    FormatExcel --> Return[Return Results]
-    Return --> End([End])
 ```
 
 ## Data Structures
@@ -234,21 +158,6 @@ glean_api:
 
 ## Security Considerations
 - All API calls are authenticated through SSO
-- Authorization checks at multiple levels
-- Rate limiting to prevent abuse
-- Audit logging for all test requests
-- Secure storage of user credentials and tokens
-
-## Scalability Considerations
-- Concurrent execution of tests for multiple users
-- Queue management for large test requests
-- Result streaming for real-time progress updates
-- Database optimization for result storage
-- Caching of frequently used configurations
-
-## Error Handling
-- Graceful handling of Glean API failures
-- Retry mechanisms with exponential backoff
-- Partial result collection if some tests fail
-- Clear error messages for authorization failures
-- Timeout handling for long-running tests
+- Authorization checks at multiple levels:
+  - requester is in the allowlist
+  - test user and questions are in respective allowlists
