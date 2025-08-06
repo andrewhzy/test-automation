@@ -80,9 +80,10 @@ sequenceDiagram
 ### Request Format
 ```json
 {
-  "requested_by": "user_id",
-  "test_users": ["user1", "user2", "..."],
-  "questions": ["question1", "question2", "..."]
+  "user_questions": {
+    "user1": ["question1", "question2", "..."],
+    "user2": ["question1", "question2", "..."]
+  }
 }
 ```
 
@@ -119,31 +120,42 @@ sequenceDiagram
 
 ## Configuration Management
 
-### Test-Request Users Allowlist
+### test-operator user allowlist
 ```yaml
-test_request_users:
-  - admin1@company.com
-  - admin2@company.com
-  - tester1@company.com
-  - tester2@company.com
+test-operator-users:
+  - test-operator-user1
+  - test-operator-user2
+  - test-operator-user3
 ```
 
-### Test Users Allowlist
+### Users and Questions Allowlist
 ```yaml
-test_users:
-  - testuser1@company.com
-  - testuser2@company.com
-  - "..."
-  - testuser20@company.com
-```
-
-### Approved Questions
-```yaml
-questions:
-  - "What is machine learning?"
-  - "How does natural language processing work?"
-  - "..."
-  - "What are the benefits of AI in business?"
+users-questions-allowed:
+  user1:
+    - question1
+    - question2
+    - question3
+    - question4
+    - question5
+    - question6
+    - question7
+    - question8
+    - question9
+    - question10
+  user2:
+    - question1
+    - question2
+    - question3
+    - question4
+    - question5
+    - question6
+    - question7
+    - question8
+    - question9
+    - question10
+  user3:
+    - question6
+    - question7
 ```
 
 ### Glean API Configuration
