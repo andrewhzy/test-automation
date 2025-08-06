@@ -1,26 +1,35 @@
-users-questions-allowed:
-  user1:
-    - question1
-    - question2
-    - question3
-    - question4
-    - question5
-    - question6
-    - question7
-    - question8
-    - question9
-    - question10
-  user2:
-    - question1
-    - question2
-    - question3
-    - question4
-    - question5
-    - question6
-    - question7
-    - question8
-    - question9
-    - question10
-  user3:
-    - question6
-    - question7
+test_users_questions_application_ids:
+  testuser1:
+    questions:
+      - "What is machine learning?"
+      - "How does neural network training work?"
+      - "What are the benefits of cloud computing?"
+      - "How do I reset my password?"
+      - "What is our company's mission statement?"
+    application_ids:
+      - "general_chat"
+      - "app2"
+      - "app3"
+  testuser2:
+    questions:
+      - "What is machine learning?"
+      - "How does neural network training work?"
+      - "What are the benefits of cloud computing?"
+      - "How do I reset my password?"
+      - "What is our company's mission statement?"
+    application_ids:
+      - "general_chat"
+      - "app2"
+      - "app3"
+  testuser3:
+    questions:
+      - "What is machine learning?"
+      - "How does neural network training work?"
+      - "What are the benefits of cloud computing?"
+      - "How do I reset my password?"
+      - "What is our company's mission statement?"
+    application_ids:
+      - "general_chat"
+      - "app2"
+      - "app3"
+  # ... up to 20 test users
