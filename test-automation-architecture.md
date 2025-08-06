@@ -72,6 +72,7 @@ sequenceDiagram
             G->>TA: Response
         end
     end
+    TA->>TA: collect all results in an json dataset
     TA->>C: Test Results (Excel format)
 ```
 
@@ -98,6 +99,11 @@ sequenceDiagram
       "test_user_id": "user1",
       "question": "What is machine learning?",
       "answer": "Machine learning is...",
+      "citation_urls": [
+        "url1",
+        "url2",
+        "url3"
+      ],
       "response_time_ms": 1500,
       "timestamp": "2024-01-01T00:00:01Z"
     }
