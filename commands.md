@@ -28,3 +28,10 @@ wanted status:
 the architecture.md need update:
 - after request is authorized, when looping through all test users, the app will use a GLEAN_API_TOKEN and act as the test user to call glean's /rest/api/v1/createauthtoken, this will get a glean_auth_token for the test user, then for each question, the service will call glean's chat api with the question and pass the glean_auth_token.
 - pls go through the architecture.md file and udpate accordingly.
+
+help to update oas.yaml:
+1. I only need 3 endpoints:
+   1. POST /testautomation/tests
+   2. GET /testautomation/allowconfig
+   3. GET /healthcheck
+pls consult test-automation-architecture.md. before updating     
