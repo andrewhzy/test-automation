@@ -84,6 +84,7 @@ sequenceDiagram
 ```json
 {
   "user": "user1",
+  "application_id": "chat_kb1",
   "questions": [
     "What is machine learning?",
     "What is machine MCP?",
@@ -139,7 +140,7 @@ test_auto_config:
       - "How do I reset my password?"
       - "What is our company's mission statement?"
     application_ids:
-      - "chat_ekb1"
+      - "chat_kb1"
       - "app2"
       - "app3"
   testuser2:
@@ -150,7 +151,7 @@ test_auto_config:
       - "How do I reset my password?"
       - "What is our company's mission statement?"
     application_ids:
-      - "chat_ekb1"
+      - "chat_kb1"
       - "app2"
       - "app3"
   testuser3:
@@ -161,7 +162,7 @@ test_auto_config:
       - "How do I reset my password?"
       - "What is our company's mission statement?"
     application_ids:
-      - "chat_ekb1"
+      - "chat_kb1"
       - "app2"
       - "app3"
   # ... up to 20 test users
