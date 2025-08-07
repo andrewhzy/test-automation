@@ -133,7 +133,6 @@ components:
       required:
         - user
         - application_id
-        - questions
       properties:
         user:
           type: string
@@ -193,9 +192,13 @@ components:
           enum:
             - completed
             - failed
-            - running
           description: Status of the test execution
           example: "completed"
+        errorMsg:
+          type: string
+          nullable: true
+          description: error details
+          example: null
         results:
           type: array
           items:
@@ -245,10 +248,10 @@ components:
             - failed
           description: Status of this specific question
           example: "success"
-        statusMsg:
+        errorMsg:
           type: string
           nullable: true
-          description: Status message or error details
+          description: error details
           example: null
 
     AllowConfigResponse:
@@ -256,42 +259,36 @@ components:
       required:
         - test_automation_allow_config
       properties:
-        test_automation_allow_config:
+        test_operators:
+          type: array
+          items:
+            type: string
+          description: List of authorized test operator IDs
+          example: ["test_operator1", "test_operator2", "test_operator3", "test_operator4"]
+        test_users:
           type: object
-          required:
-            - test_operators
-            - test_users
-          properties:
-            test_operators:
-              type: array
-              items:
-                type: string
-              description: List of authorized test operator IDs
-              example: ["test_operator1", "test_operator2", "test_operator3", "test_operator4"]
-            test_users:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/TestUserConfig'
-              description: Configuration for each test user
-              example:
-                test_user1:
-                  questions: [
-                    "What is machine learning?",
-                    "How does neural network training work?",
-                    "What are the benefits of cloud computing?",
-                    "How do I reset my password?",
-                    "What is our company's mission statement?"
-                  ]
-                  application_ids: ["chat_kb1", "app2", "app3"]
-                test_user2:
-                  questions: [
-                    "What is machine learning?",
-                    "How does neural network training work?",
-                    "What are the benefits of cloud computing?",
-                    "How do I reset my password?",
-                    "What is our company's mission statement?"
-                  ]
-                  application_ids: ["chat_kb1", "app2", "app3"]
+          additionalProperties:
+            $ref: '#/components/schemas/TestUserConfig'
+          description: Configuration for each test user
+          example:
+            test_user1:
+              questions: [
+                "What is machine learning?",
+                "How does neural network training work?",
+                "What are the benefits of cloud computing?",
+                "How do I reset my password?",
+                "What is our company's mission statement?"
+              ]
+              application_ids: ["chat_kb1", "app2", "app3"]
+            test_user2:
+              questions: [
+                "What is machine learning?",
+                "How does neural network training work?",
+                "What are the benefits of cloud computing?",
+                "How do I reset my password?",
+                "What is our company's mission statement?"
+              ]
+              application_ids: ["chat_kb1", "app2", "app3"]
 
     TestUserConfig:
       type: object
