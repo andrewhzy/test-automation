@@ -1,0 +1,397 @@
+openapi: 3.0.3
+info:
+  title: Test Automation Service API
+  description: API for automated testing of Glean chat service using multiple user accounts and predefined questions
+  version: 1.0.0
+  contact:
+    name: Test Automation Team
+    email: test-automation@company.com
+
+servers:
+  - url: https://test-automation.company.com/api/v1
+    description: Production server
+  - url: https://test-automation-dev.company.com/api/v1
+    description: Development server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /testautomation/tests:
+    post:
+      summary: Execute automated tests
+      description: Run automated tests against Glean chat API using specified test users and questions
+      operationId: executeTests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestRequest'
+            examples:
+              single_user_test:
+                summary: Test with single user and specific questions
+                value:
+                  user: "test_user1"
+                  application_id: "chat_kb1"
+                  questions: [
+                    "What is machine learning?",
+                    "How does neural network training work?"
+                  ]
+              multi_question_test:
+                summary: Test with multiple questions from config
+                value:
+                  user: "test_user1"
+                  application_id: "chat_kb1"
+                  questions: [
+                    "What is machine learning?",
+                    "What is machine MCP?",
+                    "What is machine Agent?",
+                    "How does neural network training work?"
+                  ]
+      responses:
+        '200':
+          description: Test execution completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResponse'
+        '400':
+          description: Bad request - invalid input parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - operator or test parameters not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /testautomation/allowconfig:
+    get:
+      summary: Get allowed configuration
+      description: Retrieve the complete allowed configuration including test operators, test users, questions, and application IDs
+      operationId: getAllowedConfiguration
+      responses:
+        '200':
+          description: Allowed configuration retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllowConfigResponse'
+        '401':
+          description: Unauthorized - invalid or missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /healthcheck:
+    get:
+      summary: Health check
+      description: Check service health and dependencies
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    TestRequest:
+      type: object
+      required:
+        - user
+        - application_id
+        - questions
+      properties:
+        user:
+          type: string
+          description: Test user ID to use for testing
+          example: "test_user1"
+        application_id:
+          type: string
+          description: Application ID to test against
+          example: "chat_kb1"
+        questions:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: List of questions to test
+          example: [
+            "What is machine learning?",
+            "How does neural network training work?",
+            "What are the benefits of cloud computing?"
+          ]
+
+    TestResponse:
+      type: object
+      required:
+        - test_id
+        - timestamp
+        - operated_by
+        - test_user_id
+        - application_id
+        - status
+        - results
+      properties:
+        test_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the test execution
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the test was initiated
+          example: "2024-01-01T00:00:00Z"
+        operated_by:
+          type: string
+          description: ID of the operator who requested the test
+          example: "test_operator1"
+        test_user_id:
+          type: string
+          description: Test user ID used for the test
+          example: "test_user1"
+        application_id:
+          type: string
+          description: Application ID used for testing
+          example: "chat_kb1"
+        status:
+          type: string
+          enum:
+            - completed
+            - failed
+            - running
+          description: Status of the test execution
+          example: "completed"
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionResult'
+
+    QuestionResult:
+      type: object
+      required:
+        - question
+        - timestamp
+        - status
+      properties:
+        question:
+          type: string
+          description: The question that was asked
+          example: "What is machine learning?"
+        answer:
+          type: string
+          nullable: true
+          description: The response received from Glean API
+          example: "Machine learning is a subset of artificial intelligence..."
+        citation_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: URLs cited in the response
+          example: [
+            "https://internal-docs.com/ml-overview",
+            "https://wiki.company.com/ai-basics"
+          ]
+        response_time_ms:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Response time in milliseconds
+          example: 1500
+        timestamp:
+          type: string
+          format: date-time
+          description: When the question was processed
+          example: "2024-01-01T00:00:01Z"
+        status:
+          type: string
+          enum:
+            - success
+            - failed
+          description: Status of this specific question
+          example: "success"
+        statusMsg:
+          type: string
+          nullable: true
+          description: Status message or error details
+          example: null
+
+    AllowConfigResponse:
+      type: object
+      required:
+        - test_automation_allow_config
+      properties:
+        test_automation_allow_config:
+          type: object
+          required:
+            - test_operators
+            - test_users
+          properties:
+            test_operators:
+              type: array
+              items:
+                type: string
+              description: List of authorized test operator IDs
+              example: ["test_operator1", "test_operator2", "test_operator3", "test_operator4"]
+            test_users:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/TestUserConfig'
+              description: Configuration for each test user
+              example:
+                test_user1:
+                  questions: [
+                    "What is machine learning?",
+                    "How does neural network training work?",
+                    "What are the benefits of cloud computing?",
+                    "How do I reset my password?",
+                    "What is our company's mission statement?"
+                  ]
+                  application_ids: ["chat_kb1", "app2", "app3"]
+                test_user2:
+                  questions: [
+                    "What is machine learning?",
+                    "How does neural network training work?",
+                    "What are the benefits of cloud computing?",
+                    "How do I reset my password?",
+                    "What is our company's mission statement?"
+                  ]
+                  application_ids: ["chat_kb1", "app2", "app3"]
+
+    TestUserConfig:
+      type: object
+      required:
+        - questions
+        - application_ids
+      properties:
+        questions:
+          type: array
+          items:
+            type: string
+          description: List of questions this test user can ask
+        application_ids:
+          type: array
+          items:
+            type: string
+          description: List of application IDs this test user can access
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+      properties:
+        error:
+          type: string
+          description: Error code or type
+          example: "UNAUTHORIZED_OPERATOR"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Operator 'test_operator5' is not authorized to run tests"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred
+          example: "2024-01-01T00:00:00Z"
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - dependencies
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+          description: Overall service health status
+          example: "healthy"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the health check was performed
+          example: "2024-01-01T00:00:00Z"
+        dependencies:
+          type: object
+          properties:
+            sso_service:
+              $ref: '#/components/schemas/DependencyHealth'
+            glean_service:
+              $ref: '#/components/schemas/DependencyHealth'
+            database:
+              $ref: '#/components/schemas/DependencyHealth'
+
+    DependencyHealth:
+      type: object
+      required:
+        - status
+        - response_time_ms
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+          example: "healthy"
+        response_time_ms:
+          type: integer
+          minimum: 0
+          description: Response time for dependency check
+          example: 150
+        last_error:
+          type: string
+          nullable: true
+          description: Last error encountered with this dependency
+          example: null
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: SSO JWT token obtained from authentication service
