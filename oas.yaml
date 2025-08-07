@@ -62,24 +62,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "INVALID_REQUEST"
+                message: "Missing required field 'questions' in request body"
+                timestamp: "2024-01-01T00:00:00Z"
+                details:
+                  field: "questions"
+                  provided: null
         '401':
           description: Unauthorized - invalid or missing authentication token
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "UNAUTHORIZED"
+                message: "Invalid or expired authentication token"
+                timestamp: "2024-01-01T00:00:00Z"
+                details:
+                  token_status: "expired"
         '403':
           description: Forbidden - operator or test parameters not authorized
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "FORBIDDEN"
+                message: "Operator 'test_operator5' is not authorized to run tests"
+                timestamp: "2024-01-01T00:00:00Z"
+                details:
+                  operator: "test_operator5"
+                  allowed_operators: ["test_operator1", "test_operator2", "test_operator3", "test_operator4"]
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "INTERNAL_SERVER_ERROR"
+                message: "An unexpected error occurred while processing the request"
+                timestamp: "2024-01-01T00:00:00Z"
+                details:
+                  request_id: "req-12345"
 
   /testautomation/allowconfig:
     get:
@@ -99,12 +125,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "UNAUTHORIZED"
+                message: "Invalid or expired authentication token"
+                timestamp: "2024-01-01T00:00:00Z"
+                details:
+                  token_status: "expired"
+        '403':
+          description: Forbidden - operator not authorized to view configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "FORBIDDEN"
+                message: "Operator 'test_operator5' is not authorized to view test configuration"
+                timestamp: "2024-01-01T00:00:00Z"
+                details:
+                  operator: "test_operator5"
+                  required_permission: "view_config"
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "INTERNAL_SERVER_ERROR"
+                message: "An unexpected error occurred while processing the request"
+                timestamp: "2024-01-01T00:00:00Z"
+                details:
+                  request_id: "req-12345"
 
 components:
   schemas:
@@ -298,7 +349,7 @@ components:
         error:
           type: string
           description: Error code or type
-          example: "UNAUTHORIZED_OPERATOR"
+          example: "UNAUTHORIZED_OPERATION"
         message:
           type: string
           description: Human-readable error message
