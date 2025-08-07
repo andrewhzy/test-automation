@@ -22,9 +22,9 @@ graph TB
     Client -->|<1>. Authenticate| SSO
     SSO -->|<2>. SSO token| Client
     Client -->|<3>. Test Request| TestAuto
-    TestAuto -->|"4. Chat Requests<br/>(as test users)"| Glean
+    TestAuto -->|"<4>. Chat Requests<br/>(as test users)"| Glean
     Glean -->|<5>. Responses| TestAuto
-    TestAuto -->|"6. Results (Excel)"| Client
+    TestAuto -->|"<6>. ResultSet"| Client
 ```
 
 ## Component Details
@@ -32,11 +32,9 @@ graph TB
 ### Client
 - Authenticate test operator and get SSO token
 - Call Test-Auto Service to perform tests
-- Download Excel results
 
 ### SSO Service
 - Handle authentication and return SSO token
-- Validate user permissions
 
 ### Test-Auto Service
 Main orchestration service with the following modules
@@ -76,9 +74,8 @@ sequenceDiagram
             TA->>TA: Store result with metadata
         end
     end
-    
-    TA->>TA: Generate Excel report
-    TA->>C: Excel file download
+
+    TA->>C: Response with resultset
 ```
 
 ## Data Structures
@@ -86,18 +83,13 @@ sequenceDiagram
 ### Request Format
 ```json
 {
-  "user_questions": [
-    "user1",
-    "user2"
-  ],
-  "testuser1": [
+  "user": "user1",
+  "questions": [
     "What is machine learning?",
+    "What is machine MCP?",
+    "What is machine Agent?",
     "How does neural network training work?"
-  ],
-  "options": {
-    "timeout_ms": 30000,
-    "max_retries": 3
-  }
+  ]
 }
 ```
 
@@ -107,10 +99,10 @@ sequenceDiagram
   "test_id": "uuid-12345",
   "timestamp": "2024-01-01T00:00:00Z",
   "requested_by": "operator1",
+  "test_user_id": "testuser1",
   "status": "completed",
   "results": [
     {
-      "test_user_id": "testuser1",
       "question": "What is machine learning?",
       "answer": "Machine learning is a subset of artificial intelligence...",
       "citation_urls": [
@@ -120,7 +112,7 @@ sequenceDiagram
       "response_time_ms": 1500,
       "timestamp": "2024-01-01T00:00:01Z",
       "status": "success"
-    }
+    },
   ]
 }
 ```
