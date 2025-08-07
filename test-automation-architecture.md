@@ -30,7 +30,7 @@ graph TB
 ## Component Details
 
 ### Client
-- Authenticate test operator and get SSO token
+- Authenticate test_operator and get SSO token
 - Call Test-Auto Service to perform tests
 
 ### SSO Service
@@ -52,24 +52,24 @@ sequenceDiagram
     participant TA as Test-Auto Service
     participant G as Glean Service
     
-    C->>SSO: Authenticate Test Operator
+    C->>SSO: Authenticate test_operator
     SSO->>C: SSO Token
-    C->>TA: Test Request (with SSO token, users, questions)
+    C->>TA: Test Request (with SSO token, test user, questions)
     TA->>TA: Validate SSO Token
     
     alt Authorization Checks
-        TA->>TA: Check operator in allowlist
-        TA->>TA: Check test users in allowlist
-        TA->>TA: Check questions and application_ids are in allowlist
+        TA->>TA: Check authenticated user <br/>as a test_operator is allowed
+        TA->>TA: Check test_user is allowed
+        TA->>TA: Check questions and <br/>application_ids are allowed
     else Authorization Failed
         TA->>C: Error: Unauthorized
     end
     
     loop For each test user
-        TA->>G: POST /rest/api/v1/createauthtoken (with service token, impersonate user)
-        G->>TA: User auth token
+        TA->>G: POST /rest/api/v1/createauthtoken <br/>(with GLEAN_API_TOKEN, impersonated user)
+        G->>TA: glean_auth_token
         loop For each question
-            TA->>G: POST /rest/api/v1/chat (with user token, question)
+            TA->>G: POST /rest/api/v1/chat<br/> (with glean_auth_token, question)
             G->>TA: Chat response
             TA->>TA: Store result with metadata
         end
@@ -83,7 +83,7 @@ sequenceDiagram
 ### Request Format
 ```json
 {
-  "user": "user1",
+  "user": "test_user1",
   "application_id": "chat_kb1",
   "questions": [
     "What is machine learning?",
@@ -99,8 +99,9 @@ sequenceDiagram
 {
   "test_id": "uuid-12345",
   "timestamp": "2024-01-01T00:00:00Z",
-  "requested_by": "operator1",
-  "test_user_id": "testuser1",
+  "operated_by": "test_operator1",
+  "test_user_id": "test_user1",
+  "application_id": "chat_kb1",
   "status": "completed",
   "results": [
     {
@@ -112,7 +113,8 @@ sequenceDiagram
       ],
       "response_time_ms": 1500,
       "timestamp": "2024-01-01T00:00:01Z",
-      "status": "success"
+      "status": "success",
+      "statusMsg": None
     },
   ]
 }
@@ -122,50 +124,47 @@ sequenceDiagram
 
 ### Test Operator Allowlist
 ```yaml
-test_operators:
-  - operator1
-  - operator2
-  - operator3
-  - operator4
-```
-
-### Test Users and Questions Allowlist
-```yaml
-test_auto_config:
-  testuser1:
-    questions:
-      - "What is machine learning?"
-      - "How does neural network training work?"
-      - "What are the benefits of cloud computing?"
-      - "How do I reset my password?"
-      - "What is our company's mission statement?"
-    application_ids:
-      - "chat_kb1"
-      - "app2"
-      - "app3"
-  testuser2:
-    questions:
-      - "What is machine learning?"
-      - "How does neural network training work?"
-      - "What are the benefits of cloud computing?"
-      - "How do I reset my password?"
-      - "What is our company's mission statement?"
-    application_ids:
-      - "chat_kb1"
-      - "app2"
-      - "app3"
-  testuser3:
-    questions:
-      - "What is machine learning?"
-      - "How does neural network training work?"
-      - "What are the benefits of cloud computing?"
-      - "How do I reset my password?"
-      - "What is our company's mission statement?"
-    application_ids:
-      - "chat_kb1"
-      - "app2"
-      - "app3"
-  # ... up to 20 test users
+test_automation_allow_config:
+  test_operators:
+    - test_operator1
+    - test_operator2
+    - test_operator3
+    - test_operator4
+  test_users:
+    test_user1:
+      questions:
+        - "What is machine learning?"
+        - "How does neural network training work?"
+        - "What are the benefits of cloud computing?"
+        - "How do I reset my password?"
+        - "What is our company's mission statement?"
+      application_ids:
+        - "chat_kb1"
+        - "app2"
+        - "app3"
+    test_user2:
+      questions:
+        - "What is machine learning?"
+        - "How does neural network training work?"
+        - "What are the benefits of cloud computing?"
+        - "How do I reset my password?"
+        - "What is our company's mission statement?"
+      application_ids:
+        - "chat_kb1"
+        - "app2"
+        - "app3"
+    test_user3:
+      questions:
+        - "What is machine learning?"
+        - "How does neural network training work?"
+        - "What are the benefits of cloud computing?"
+        - "How do I reset my password?"
+        - "What is our company's mission statement?"
+      application_ids:
+        - "chat_kb1"
+        - "app2"
+        - "app3"
+    # ... up to 20 test users
 ```
 
 ## Security Considerations
