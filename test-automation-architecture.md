@@ -15,8 +15,8 @@ This document describes the architecture for an automated testing service that c
 
 ```mermaid
 graph TB
-    Client[Client<br/>Web UI/CLI/Scripts]
-    SSO[SSO Service<br/>Authentication]
+    Client[ACOE Python code]
+    SSO[SSO Service]
     TestAuto[Answer Generation Service]
     Glean[Glean Service<br/>Chat API]
     
