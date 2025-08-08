@@ -5,12 +5,12 @@ info:
   version: 1.0.0
   contact:
     name: Test Automation Team
-    email: test-automation@company.com
+    email: andrew@company.com
 
 servers:
-  - url: https://test-automation.company.com/api/v1
+  - url: https://answer-generation-automation.company.com/api/v1
     description: Production server
-  - url: https://test-automation-dev.company.com/api/v1
+  - url: https://answer-generation-automation-dev.company.com/api/v1
     description: Development server
 
 security:
@@ -32,7 +32,7 @@ paths:
               single_user_test:
                 summary: Test with single user and specific questions
                 value:
-                  user: "test_user1"
+                  user: "target_user1"
                   application_id: "chat_kb1"
                   questions: [
                     "What is machine learning?",
@@ -41,7 +41,7 @@ paths:
               multi_question_test:
                 summary: Test with multiple questions from config
                 value:
-                  user: "test_user1"
+                  user: "target_user1"
                   application_id: "chat_kb1"
                   questions: [
                     "What is machine learning?",
@@ -163,22 +163,21 @@ components:
       type: object
       required:
         - user
-        - application_id
       properties:
         user:
           type: string
           description: Test user ID to use for testing
-          example: "test_user1"
+          example: "target_user1"
         application_id:
           type: string
-          description: Application ID to test against
+          description: Application ID to test against, when not specified, use default application ID
           example: "chat_kb1"
         questions:
           type: array
           items:
             type: string
           minItems: 1
-          description: List of questions to test
+          description: List of questions to test, when not specified, all questions from the configuration will be used
           example: [
             "What is machine learning?",
             "How does neural network training work?",
@@ -191,8 +190,7 @@ components:
         - test_id
         - timestamp
         - operated_by
-        - test_user_id
-        - application_id
+        - target_user_id
         - status
         - results
       properties:
@@ -210,18 +208,19 @@ components:
           type: string
           description: ID of the operator who requested the test
           example: "test_operator1"
-        test_user_id:
+        target_user_id:
           type: string
           description: Test user ID used for the test
-          example: "test_user1"
+          example: "target_user1"
         application_id:
           type: string
-          description: Application ID used for testing
+          description: Application ID used for testing, when not specified, use default application ID
           example: "chat_kb1"
         status:
           type: string
           enum:
             - completed
+            - partially completed
             - failed
           description: Status of the test execution
           example: "completed"
@@ -232,6 +231,7 @@ components:
           example: null
         results:
           type: array
+          description: List of results for each question asked during the test
           items:
             $ref: '#/components/schemas/QuestionResult'
 
@@ -289,7 +289,7 @@ components:
       type: object
       required:
         - test_operators
-        - test_users
+        - target_users
       properties:
         test_operators:
           type: array
@@ -297,13 +297,13 @@ components:
             type: string
           description: List of authorized test operator IDs
           example: ["test_operator1", "test_operator2", "test_operator3", "test_operator4"]
-        test_users:
+        target_users:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/TestUserConfig'
           description: Configuration for each test user
           example:
-            test_user1:
+            target_user1:
               questions: [
                 "What is machine learning?",
                 "How does neural network training work?",
@@ -312,7 +312,7 @@ components:
                 "What is our company's mission statement?"
               ]
               application_ids: ["chat_kb1", "app2", "app3"]
-            test_user2:
+            target_user2:
               questions: [
                 "What is machine learning?",
                 "How does neural network training work?",

@@ -1,14 +1,15 @@
-# Test Automation Service Architecture
+# Answer Generation Service Architecture
 
 ## Overview
-This document describes the architecture for an automated testing service that tests Glean chat API using multiple user accounts and predefined questions.
+This document describes the architecture for an automated testing service that collect Glean chat answers using multiple target_user accounts and predefined questions.
 
 ## Requirements
-- around 20 test users for automated testing
-- around 4 authorized users who can trigger tests
-- around 30 predefined questions for testing
-- Automated collection of responses in Excel format
-- Configurable users and questions
+- around 20 test users for automated answer generation (target_users)
+- around 4 authorized users who can call this API (test_operators)
+- around 200 predefined questions for answer generation
+  - (~30 questions per use case) x (6 use cases) = 180 questions
+- Automated collection of answers in json format returned by response
+- Configurable target users and questions and application ids
 
 ## High-Level Architecture
 
@@ -16,7 +17,7 @@ This document describes the architecture for an automated testing service that t
 graph TB
     Client[Client<br/>Web UI/CLI/Scripts]
     SSO[SSO Service<br/>Authentication]
-    TestAuto[Test-Auto Service<br/>Main Service]
+    TestAuto[Answer Generation Service]
     Glean[Glean Service<br/>Chat API]
     
     Client -->|<1>. Authenticate| SSO
@@ -31,12 +32,12 @@ graph TB
 
 ### Client
 - Authenticate test_operator and get SSO token
-- Call Test-Auto Service to perform tests
+- Call Answer Generation Service to perform tests
 
 ### SSO Service
 - Handle authentication and return SSO token
 
-### Test-Auto Service
+### Answer Generation Service
 Main orchestration service with the following modules
 
 ### Glean Service
@@ -49,7 +50,7 @@ Main orchestration service with the following modules
 sequenceDiagram
     participant C as Client
     participant SSO as SSO Service
-    participant TA as Test-Auto Service
+    participant TA as Answer Generation Service
     participant G as Glean Service
     
     C->>SSO: Authenticate test_operator
@@ -59,7 +60,7 @@ sequenceDiagram
     
     alt Authorization Checks
         TA->>TA: Check authenticated user <br/>as a test_operator is allowed
-        TA->>TA: Check test_user is allowed
+        TA->>TA: Check target_user is allowed
         TA->>TA: Check questions and <br/>application_ids are allowed
     else Authorization Failed
         TA->>C: Error: Unauthorized
@@ -83,7 +84,7 @@ sequenceDiagram
 ### Request Format
 ```json
 {
-  "user": "test_user1",
+  "user": "target_user1",
   "application_id": "chat_kb1",
   "questions": [
     "What is machine learning?",
@@ -100,7 +101,7 @@ sequenceDiagram
   "test_id": "uuid-12345",
   "timestamp": "2024-01-01T00:00:00Z",
   "operated_by": "test_operator1",
-  "test_user_id": "test_user1",
+  "target_user_id": "target_user1",
   "application_id": "chat_kb1",
   "status": "completed",
   "results": [
@@ -130,8 +131,8 @@ test_automation_allow_config:
     - test_operator2
     - test_operator3
     - test_operator4
-  test_users:
-    test_user1:
+  target_users:
+    target_user1:
       questions:
         - "What is machine learning?"
         - "How does neural network training work?"
@@ -142,7 +143,7 @@ test_automation_allow_config:
         - "chat_kb1"
         - "app2"
         - "app3"
-    test_user2:
+    target_user2:
       questions:
         - "What is machine learning?"
         - "How does neural network training work?"
@@ -153,7 +154,7 @@ test_automation_allow_config:
         - "chat_kb1"
         - "app2"
         - "app3"
-    test_user3:
+    target_user3:
       questions:
         - "What is machine learning?"
         - "How does neural network training work?"
@@ -170,8 +171,8 @@ test_automation_allow_config:
 ## Security Considerations
 - All API calls authenticated through SSO
 - Multi-level authorization checks:
-  - Test operator must be in allowlist
-  - Test users must be in allowlist
-  - Questions and application_ids must be pre-approved for each test user
+  - test_operator must be in allowlist
+  - target_user must be in allowlist
+  - Questions and application_ids must be pre-approved for each target_user
 - Service token for Glean API stored securely (environment variable/secrets manager)
-- Audit logging of all test executions
+- Audit logging of all API executions
