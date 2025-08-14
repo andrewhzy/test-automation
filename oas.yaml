@@ -17,32 +17,19 @@ security:
   - BearerAuth: []
 
 paths:
-  /answergeneration/tests:
+  /answergeneration/execution/{usecase_id}:
     post:
       summary: Execute automated tests
       description: Run automated tests against Glean chat API using specified test users and questions
       operationId: executeTests
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TestRequest'
-            examples:
-              usecase_test:
-                summary: Test with use case configuration
-                value:
-                  usecase_id: "usecase_id_1"
-              usecase_with_overrides:
-                summary: Test with use case and custom parameters
-                value:
-                  usecase_id: "usecase_id_2"
-                  users: ["target_user_1", "target_user_2"]
-                  application_ids: ["ai_app_1"]
-                  questions: [
-                    "How do I update my profile settings?",
-                    "What are the system requirements for this software?"
-                  ]
+      parameters:
+        - name: usecase_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Use case ID that defines the users, questions, and application IDs to test
+          example: "usecase_id_1"
       responses:
         '200':
           description: Test execution completed successfully
@@ -58,11 +45,11 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error: "INVALID_REQUEST"
-                message: "Missing required field 'usecase_id' in request body"
+                message: "Invalid usecase_id parameter in URL path"
                 timestamp: "2024-01-01T00:00:00Z"
                 details:
                   field: "usecase_id"
-                  provided: null
+                  provided: "invalid_usecase"
         '401':
           description: Unauthorized - invalid or missing authentication token
           content:
@@ -201,38 +188,6 @@ paths:
 
 components:
   schemas:
-    TestRequest:
-      type: object
-      required:
-        - usecase_id
-      properties:
-        usecase_id:
-          type: string
-          description: Use case ID that defines the users, questions, and application IDs to test
-          example: "usecase_id_1"
-        users:
-          type: array
-          items:
-            type: string
-          description: Override users from use case configuration (optional)
-          example: ["target_user_1", "target_user_2"]
-        application_ids:
-          type: array
-          items:
-            type: string
-          description: Override application IDs from use case configuration (optional)
-          example: ["ai_app_1", "ai_app_2"]
-        questions:
-          type: array
-          items:
-            type: string
-          description: Override questions from use case configuration (optional)
-          example: [
-            "What is machine learning?",
-            "How does neural network training work?",
-            "What are the benefits of cloud computing?"
-          ]
-
     TestResponse:
       type: object
       required:
