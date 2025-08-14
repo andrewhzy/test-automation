@@ -45,7 +45,7 @@ Main orchestration service with the following modules
 - Target service being tested
 - Provides chat API and authentication endpoints
 
-## Authentication & Authorization Flow
+## Authentication & Authorization & Execution Flow
 
 ```mermaid
 sequenceDiagram
@@ -60,9 +60,8 @@ sequenceDiagram
     TA->>TA: Validate SSO Token
     
     alt Authorization Checks
-        TA->>TA: Check authenticated user <br/>as a test_operator is allowed
-        TA->>TA: Check usecase_id is valid <br/>and accessible to test_operator
-        TA->>TA: Load use case configuration <br/>(users, questions, application_ids)
+        TA->>TA: Check if test_operator belongs to <br/>required security group
+        TA->>TA: Check usecase_id is valid, <br/> retrieve the use case if valid
     else Authorization Failed
         TA->>C: Error: Unauthorized
     end
@@ -90,6 +89,7 @@ sequenceDiagram
 - **Path Parameters**: 
   - `usecase_id`: Use case ID that defines the users, questions, and application IDs to test
 - **Request Body**: None required
+- **Response**: A Result set and metadata fields
 - **Authentication**: Bearer token (SSO JWT)
 
 ### Get Use Cases
@@ -99,34 +99,6 @@ sequenceDiagram
 - **Response**: Array of UseCase objects
 - **Authentication**: Bearer token (SSO JWT)
 
-## Data Structures
-
-### Response Format
-```json
-{
-  "test_id": "uuid-12345",
-  "timestamp": "2024-01-01T00:00:00Z",
-  "operated_by": "test_operator1",
-  "usecase_id": "usecase_id_1",
-  "status": "completed",
-  "results": [
-    {
-      "target_user_id": "target_user_1",
-      "application_id": "ai_app_1",
-      "question": "What is machine learning?",
-      "answer": "Machine learning is a subset of artificial intelligence...",
-      "citation_urls": [
-        "https://internal-docs.com/ml-overview",
-        "https://wiki.company.com/ai-basics"
-      ],
-      "response_time_ms": 1500,
-      "timestamp": "2024-01-01T00:00:01Z",
-      "status": "success",
-      "errorMsg": null
-    }
-  ]
-}
-```
 
 ## Configuration Management
 
@@ -184,7 +156,7 @@ answer_generation:
 ## Security Considerations
 - All API calls authenticated through SSO
 - Multi-level authorization checks:
-  - test_operator must be in allowlist
+  - test_operator must belong to required security group (e.g., "answer-generation-operators")
   - usecase_id must be valid and accessible to the test_operator
   - target_users must be in allowlist for the specified use case
   - Questions and application_ids must be pre-approved for each use case
