@@ -17,7 +17,7 @@ security:
   - BearerAuth: []
 
 paths:
-  /testautomation/tests:
+  /answergeneration/tests:
     post:
       summary: Execute automated tests
       description: Run automated tests against Glean chat API using specified test users and questions
@@ -107,7 +107,7 @@ paths:
                 details:
                   request_id: "req-12345"
 
-  /testautomation/allowlistconfig:
+  /answergeneration/allowlistconfig:
     get:
       summary: Get allowed configuration
       description: Retrieve the complete allowed configuration including test operators, test users, questions, and application IDs
