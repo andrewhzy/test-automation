@@ -16,7 +16,7 @@ This document describes the architecture for an automated testing service that c
 ```mermaid
 graph TB
     Client[ACOE Python code]
-    SSO[SSO Service]
+    SSO[ADA SSO]
     TestAuto[Answer Generation Service]
     Glean[Glean Service<br/>Chat API]
     
@@ -34,7 +34,7 @@ graph TB
 - Authenticate test_operator and get SSO token
 - Call Answer Generation Service to perform tests
 
-### SSO Service
+### ADA SSO
 - Handle authentication and return SSO token
 
 ### Answer Generation Service
@@ -49,7 +49,7 @@ Main orchestration service with the following modules
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant SSO as SSO Service
+    participant SSO as ADA SSO
     participant TA as Answer Generation Service
     participant G as Glean Service
     
@@ -67,7 +67,7 @@ sequenceDiagram
     end
     
     loop For each test user
-        TA->>G: POST /rest/api/v1/createauthtoken <br/>(with GLEAN_API_TOKEN, impersonated user)
+        TA->>G: POST /rest/api/v1/createauthtoken <br/>(impersonate as impersonated user)
         G->>TA: glean_auth_token
         loop For each question
             TA->>G: POST /rest/api/v1/chat<br/> (with glean_auth_token, question)
@@ -125,47 +125,40 @@ sequenceDiagram
 
 ### Test Operator Allowlist
 ```yaml
-test_automation_allow_config:
-  test_operators:
-    - test_operator1
-    - test_operator2
-    - test_operator3
-    - test_operator4
-  target_users:
-    target_user1:
-      questions:
-        - "What is machine learning?"
-        - "How does neural network training work?"
-        - "What are the benefits of cloud computing?"
-        - "How do I reset my password?"
-        - "What is our company's mission statement?"
-      application_ids:
-        - "chat_kb1"
-        - "app2"
-        - "app3"
-    target_user2:
-      questions:
-        - "What is machine learning?"
-        - "How does neural network training work?"
-        - "What are the benefits of cloud computing?"
-        - "How do I reset my password?"
-        - "What is our company's mission statement?"
-      application_ids:
-        - "chat_kb1"
-        - "app2"
-        - "app3"
-    target_user3:
-      questions:
-        - "What is machine learning?"
-        - "How does neural network training work?"
-        - "What are the benefits of cloud computing?"
-        - "How do I reset my password?"
-        - "What is our company's mission statement?"
-      application_ids:
-        - "chat_kb1"
-        - "app2"
-        - "app3"
-    # ... up to 20 test users
+test_automation_allowlist:
+  - target_user_name: "target_user_1"
+    questions:
+      - question: "What is machine learning?"
+      - question: "How does neural network training work?"
+      - question: "What are the benefits of cloud computing?"
+      - question: "How do I reset my password?"
+      - question: "What is our company's mission statement?"
+    ai_app_ids:
+      - ai_app_name: "ai_app_1"
+      - ai_app_name: "ai_app_2"
+      - ai_app_name: "ai_app_3"
+  - target_user_name: "target_user_2"
+    questions:
+      - question: "How do I update my profile settings?"
+      - question: "What are the system requirements for this software?"
+      - question: "Can you explain data privacy policies?"
+      - question: "How to troubleshoot connection issues?"
+      - question: "What integrations are available?"
+    ai_app_ids:
+      - ai_app_name: "ai_app_1"
+      - ai_app_name: "ai_app_2"
+      - ai_app_name: "ai_app_3"
+  - target_user_name: "target_user_3"
+    questions:
+      - question: "Show me sales analytics for Q4"
+      - question: "How to generate monthly reports?"
+      - question: "What are our top performing products?"
+      - question: "Can you analyze customer churn data?"
+      - question: "Export user engagement metrics"
+    ai_app_ids:
+      - ai_app_name: "ai_app_1"
+      - ai_app_name: "ai_app_2"
+      - ai_app_name: "ai_app_3"
 ```
 
 ## Security Considerations
