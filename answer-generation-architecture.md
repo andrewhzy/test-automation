@@ -32,7 +32,8 @@ graph TB
 
 ### Client
 - Authenticate test_operator and get SSO token
-- Call Answer Generation Service to perform tests
+- Browse available use cases via `GET /answergeneration/usecases`
+- Execute specific use case via `POST /answergeneration/execution/{usecase_id}`
 
 ### ADA SSO
 - Handle authentication and return SSO token
@@ -55,7 +56,7 @@ sequenceDiagram
     
     C->>SSO: Authenticate test_operator
     SSO->>C: SSO Token
-    C->>TA: Test Request (with SSO token, usecase_id)
+    C->>TA: POST /answergeneration/execution/{usecase_id} <br/>(with SSO token)
     TA->>TA: Validate SSO Token
     
     alt Authorization Checks
@@ -81,21 +82,24 @@ sequenceDiagram
     TA->>C: Response with resultset
 ```
 
-## Data Structures
+## API Endpoints
 
-### Request Format
-```json
-{
-  "usecase_id": "usecase_id_1",
-  "users": ["target_user_1", "target_user_2"],
-  "application_ids": ["ai_app_1", "ai_app_2"],
-  "questions": [
-    "What is machine learning?",
-    "How does neural network training work?",
-    "What are the benefits of cloud computing?"
-  ]
-}
-```
+### Execute Use Case
+- **Endpoint**: `POST /answergeneration/execution/{usecase_id}`
+- **Description**: Execute answer generation for a specific use case
+- **Path Parameters**: 
+  - `usecase_id`: Use case ID that defines the users, questions, and application IDs to test
+- **Request Body**: None required
+- **Authentication**: Bearer token (SSO JWT)
+
+### Get Use Cases
+- **Endpoint**: `GET /answergeneration/usecases`
+- **Description**: Retrieve the complete list of available use cases
+- **Request Body**: None
+- **Response**: Array of UseCase objects
+- **Authentication**: Bearer token (SSO JWT)
+
+## Data Structures
 
 ### Response Format
 ```json
@@ -118,7 +122,7 @@ sequenceDiagram
       "response_time_ms": 1500,
       "timestamp": "2024-01-01T00:00:01Z",
       "status": "success",
-      "statusMsg": None
+      "errorMsg": null
     }
   ]
 }
