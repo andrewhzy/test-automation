@@ -32,8 +32,8 @@ paths:
               single_user_test:
                 summary: Test with single user and specific questions
                 value:
-                  user: "target_user1"
-                  application_id: "chat_kb1"
+                  user: "target_user_1"
+                  application_id: "ai_app_1"
                   questions: [
                     "What is machine learning?",
                     "How does neural network training work?"
@@ -41,8 +41,8 @@ paths:
               multi_question_test:
                 summary: Test with multiple questions from config
                 value:
-                  user: "target_user1"
-                  application_id: "chat_kb1"
+                  user: "target_user_1"
+                  application_id: "ai_app_1"
                   questions: [
                     "What is machine learning?",
                     "What is machine MCP?",
@@ -107,7 +107,7 @@ paths:
                 details:
                   request_id: "req-12345"
 
-  /testautomation/allowconfig:
+  /testautomation/allowlistconfig:
     get:
       summary: Get allowed configuration
       description: Retrieve the complete allowed configuration including test operators, test users, questions, and application IDs
@@ -118,7 +118,43 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AllowConfigResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/TargetUserAllowlistItem'
+                example:
+                  - target_user_name: "target_user_1"
+                    questions:
+                      - question: "What is machine learning?"
+                      - question: "How does neural network training work?"
+                      - question: "What are the benefits of cloud computing?"
+                      - question: "How do I reset my password?"
+                      - question: "What is our company's mission statement?"
+                    ai_app_ids:
+                      - ai_app_name: "ai_app_1"
+                      - ai_app_name: "ai_app_2"
+                      - ai_app_name: "ai_app_3"
+                  - target_user_name: "target_user_2"
+                    questions:
+                      - question: "How do I update my profile settings?"
+                      - question: "What are the system requirements for this software?"
+                      - question: "Can you explain data privacy policies?"
+                      - question: "How to troubleshoot connection issues?"
+                      - question: "What integrations are available?"
+                    ai_app_ids:
+                      - ai_app_name: "ai_app_1"
+                      - ai_app_name: "ai_app_2"
+                      - ai_app_name: "ai_app_3"
+                  - target_user_name: "target_user_3"
+                    questions:
+                      - question: "Show me sales analytics for Q4"
+                      - question: "How to generate monthly reports?"
+                      - question: "What are our top performing products?"
+                      - question: "Can you analyze customer churn data?"
+                      - question: "Export user engagement metrics"
+                    ai_app_ids:
+                      - ai_app_name: "ai_app_1"
+                      - ai_app_name: "ai_app_2"
+                      - ai_app_name: "ai_app_3"
         '401':
           description: Unauthorized - invalid or missing authentication token
           content:
@@ -167,11 +203,11 @@ components:
         user:
           type: string
           description: Test user ID to use for testing
-          example: "target_user1"
+          example: "target_user_1"
         application_id:
           type: string
           description: Application ID to test against, when not specified, use default application ID
-          example: "chat_kb1"
+          example: "ai_app_1"
         questions:
           type: array
           items:
@@ -211,11 +247,11 @@ components:
         target_user_id:
           type: string
           description: Test user ID used for the test
-          example: "target_user1"
+          example: "target_user_1"
         application_id:
           type: string
           description: Application ID used for testing, when not specified, use default application ID
-          example: "chat_kb1"
+          example: "ai_app_1"
         status:
           type: string
           enum:
@@ -285,59 +321,47 @@ components:
           description: error details
           example: null
 
-    AllowConfigResponse:
+    TargetUserAllowlistItem:
       type: object
       required:
-        - test_operators
-        - target_users
-      properties:
-        test_operators:
-          type: array
-          items:
-            type: string
-          description: List of authorized test operator IDs
-          example: ["test_operator1", "test_operator2", "test_operator3", "test_operator4"]
-        target_users:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/TestUserConfig'
-          description: Configuration for each test user
-          example:
-            target_user1:
-              questions: [
-                "What is machine learning?",
-                "How does neural network training work?",
-                "What are the benefits of cloud computing?",
-                "How do I reset my password?",
-                "What is our company's mission statement?"
-              ]
-              application_ids: ["chat_kb1", "app2", "app3"]
-            target_user2:
-              questions: [
-                "What is machine learning?",
-                "How does neural network training work?",
-                "What are the benefits of cloud computing?",
-                "How do I reset my password?",
-                "What is our company's mission statement?"
-              ]
-              application_ids: ["chat_kb1", "app2", "app3"]
-
-    TestUserConfig:
-      type: object
-      required:
+        - target_user_name
         - questions
-        - application_ids
+        - ai_app_ids
       properties:
+        target_user_name:
+          type: string
+          description: Name of the target user
+          example: "target_user_1"
         questions:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/QuestionItem'
           description: List of questions this test user can ask
-        application_ids:
+        ai_app_ids:
           type: array
           items:
-            type: string
-          description: List of application IDs this test user can access
+            $ref: '#/components/schemas/AppIdItem'
+          description: List of AI application IDs this test user can access
+
+    QuestionItem:
+      type: object
+      required:
+        - question
+      properties:
+        question:
+          type: string
+          description: The question text
+          example: "What is machine learning?"
+
+    AppIdItem:
+      type: object
+      required:
+        - ai_app_name
+      properties:
+        ai_app_name:
+          type: string
+          description: The AI application name
+          example: "ai_app_1"
 
     ErrorResponse:
       type: object
