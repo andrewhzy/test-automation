@@ -123,7 +123,7 @@ sequenceDiagram
 
 ## Configuration Management
 
-### Test Operator Allowlist
+### Answer Generation Use Cases
 ```yaml
 answer_generation:
   usecases:
