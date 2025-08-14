@@ -4,10 +4,8 @@
 This document describes the architecture for an automated testing service that collect Glean chat answers using multiple target_user accounts and predefined questions.
 
 ## Requirements
-- around 20 test users for automated answer generation (target_users)
-- around 4 authorized users who can call this API (test_operators)
-- around 200 predefined questions for answer generation
-  - (~5 questions per use case) x (3 use cases) = 15 questions (expandable to more)
+- around 6 senarios need answer generation automations (use cases)
+- around 4 users (request for a security group) who can call this API (test_operators)
 - Automated collection of answers in json format returned by response
 - Configurable target users and questions and application ids
 
@@ -67,9 +65,9 @@ sequenceDiagram
     end
     
     loop For each user in use case
+        TA->>G: POST /rest/api/v1/createauthtoken <br/>(impersonate as target_user)
+        G->>TA: glean_auth_token
         loop For each question in use case
-            TA->>G: POST /rest/api/v1/createauthtoken <br/>(impersonate as target_user)
-            G->>TA: glean_auth_token
             loop For each application_id in use case
                 TA->>G: POST /rest/api/v1/chat<br/> (with glean_auth_token, question, application_id)
                 G->>TA: Chat response
