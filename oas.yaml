@@ -29,25 +29,19 @@ paths:
             schema:
               $ref: '#/components/schemas/TestRequest'
             examples:
-              single_user_test:
-                summary: Test with single user and specific questions
+              usecase_test:
+                summary: Test with use case configuration
                 value:
-                  user: "target_user_1"
-                  application_id: "ai_app_1"
-                  questions: [
-                    "What is machine learning?",
-                    "How does neural network training work?"
-                  ]
-              multi_question_test:
-                summary: Test with multiple questions from config
+                  usecase_id: "usecase_id_1"
+              usecase_with_overrides:
+                summary: Test with use case and custom parameters
                 value:
-                  user: "target_user_1"
-                  application_id: "ai_app_1"
+                  usecase_id: "usecase_id_2"
+                  users: ["target_user_1", "target_user_2"]
+                  application_ids: ["ai_app_1"]
                   questions: [
-                    "What is machine learning?",
-                    "What is machine MCP?",
-                    "What is machine Agent?",
-                    "How does neural network training work?"
+                    "How do I update my profile settings?",
+                    "What are the system requirements for this software?"
                   ]
       responses:
         '200':
@@ -110,7 +104,7 @@ paths:
   /answergeneration/allowlist:
     get:
       summary: Get allowed configuration
-      description: Retrieve the complete allowed configuration including test operators, test users, questions, and application IDs
+      description: Retrieve the complete allowed configuration including use cases with their users, questions, and application IDs
       operationId: getAllowedConfiguration
       responses:
         '200':
@@ -118,43 +112,54 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TargetUserAllowlistItem'
-                example:
-                  - target_user_name: "target_user_1"
+                $ref: '#/components/schemas/AllowedConfiguration'
+              example:
+                usecases:
+                  - id: "usecase_id_1"
+                    users:
+                      - "user_1"
+                      - "user_2"
+                      - "user_3"
                     questions:
-                      - question: "What is machine learning?"
-                      - question: "How does neural network training work?"
-                      - question: "What are the benefits of cloud computing?"
-                      - question: "How do I reset my password?"
-                      - question: "What is our company's mission statement?"
+                      - "What is machine learning?"
+                      - "How does neural network training work?"
+                      - "What are the benefits of cloud computing?"
+                      - "How do I reset my password?"
+                      - "What is our company's mission statement?"
                     ai_app_ids:
-                      - ai_app_name: "ai_app_1"
-                      - ai_app_name: "ai_app_2"
-                      - ai_app_name: "ai_app_3"
-                  - target_user_name: "target_user_2"
+                      - "ai_app_1"
+                      - "ai_app_2"
+                      - "ai_app_3"
+                  - id: "usecase_id_2"
+                    users:
+                      - "user_1"
+                      - "user_2"
+                      - "user_3"
                     questions:
-                      - question: "How do I update my profile settings?"
-                      - question: "What are the system requirements for this software?"
-                      - question: "Can you explain data privacy policies?"
-                      - question: "How to troubleshoot connection issues?"
-                      - question: "What integrations are available?"
+                      - "How do I update my profile settings?"
+                      - "What are the system requirements for this software?"
+                      - "Can you explain data privacy policies?"
+                      - "How to troubleshoot connection issues?"
+                      - "What integrations are available?"
                     ai_app_ids:
-                      - ai_app_name: "ai_app_1"
-                      - ai_app_name: "ai_app_2"
-                      - ai_app_name: "ai_app_3"
-                  - target_user_name: "target_user_3"
+                      - "ai_app_1"
+                      - "ai_app_2"
+                      - "ai_app_3"
+                  - id: "usecase_id_3"
+                    users:
+                      - "user_1"
+                      - "user_2"
+                      - "user_3"
                     questions:
-                      - question: "Show me sales analytics for Q4"
-                      - question: "How to generate monthly reports?"
-                      - question: "What are our top performing products?"
-                      - question: "Can you analyze customer churn data?"
-                      - question: "Export user engagement metrics"
+                      - "Show me sales analytics for Q4"
+                      - "How to generate monthly reports?"
+                      - "What are our top performing products?"
+                      - "Can you analyze customer churn data?"
+                      - "Export user engagement metrics"
                     ai_app_ids:
-                      - ai_app_name: "ai_app_1"
-                      - ai_app_name: "ai_app_2"
-                      - ai_app_name: "ai_app_3"
+                      - "ai_app_1"
+                      - "ai_app_2"
+                      - "ai_app_3"
         '401':
           description: Unauthorized - invalid or missing authentication token
           content:
@@ -198,22 +203,29 @@ components:
     TestRequest:
       type: object
       required:
-        - user
+        - usecase_id
       properties:
-        user:
+        usecase_id:
           type: string
-          description: Test user ID to use for testing
-          example: "target_user_1"
-        application_id:
-          type: string
-          description: Application ID to test against, when not specified, use default application ID
-          example: "ai_app_1"
+          description: Use case ID that defines the users, questions, and application IDs to test
+          example: "usecase_id_1"
+        users:
+          type: array
+          items:
+            type: string
+          description: Override users from use case configuration (optional)
+          example: ["target_user_1", "target_user_2"]
+        application_ids:
+          type: array
+          items:
+            type: string
+          description: Override application IDs from use case configuration (optional)
+          example: ["ai_app_1", "ai_app_2"]
         questions:
           type: array
           items:
             type: string
-          minItems: 1
-          description: List of questions to test, when not specified, all questions from the configuration will be used
+          description: Override questions from use case configuration (optional)
           example: [
             "What is machine learning?",
             "How does neural network training work?",
@@ -226,7 +238,7 @@ components:
         - test_id
         - timestamp
         - operated_by
-        - target_user_id
+        - usecase_id
         - status
         - results
       properties:
@@ -244,14 +256,10 @@ components:
           type: string
           description: ID of the operator who requested the test
           example: "test_operator1"
-        target_user_id:
+        usecase_id:
           type: string
-          description: Test user ID used for the test
-          example: "target_user_1"
-        application_id:
-          type: string
-          description: Application ID used for testing, when not specified, use default application ID
-          example: "ai_app_1"
+          description: Use case ID that was executed
+          example: "usecase_id_1"
         status:
           type: string
           enum:
@@ -274,10 +282,20 @@ components:
     QuestionResult:
       type: object
       required:
+        - target_user_id
+        - application_id
         - question
         - timestamp
         - status
       properties:
+        target_user_id:
+          type: string
+          description: Test user ID used for this specific question
+          example: "target_user_1"
+        application_id:
+          type: string
+          description: Application ID used for this specific question
+          example: "ai_app_1"
         question:
           type: string
           description: The question that was asked
@@ -321,47 +339,50 @@ components:
           description: error details
           example: null
 
-    TargetUserAllowlistItem:
+    AllowedConfiguration:
       type: object
       required:
-        - target_user_name
+        - usecases
+      properties:
+        usecases:
+          type: array
+          items:
+            $ref: '#/components/schemas/UseCase'
+          description: List of available use cases
+
+    UseCase:
+      type: object
+      required:
+        - id
+        - users
         - questions
         - ai_app_ids
       properties:
-        target_user_name:
+        id:
           type: string
-          description: Name of the target user
-          example: "target_user_1"
+          description: Unique identifier for the use case
+          example: "usecase_id_1"
+        users:
+          type: array
+          items:
+            type: string
+          description: List of test users for this use case
+          example: ["user_1", "user_2", "user_3"]
         questions:
           type: array
           items:
-            $ref: '#/components/schemas/QuestionItem'
-          description: List of questions this test user can ask
+            type: string
+          description: List of questions for this use case
+          example: [
+            "What is machine learning?",
+            "How does neural network training work?"
+          ]
         ai_app_ids:
           type: array
           items:
-            $ref: '#/components/schemas/AppIdItem'
-          description: List of AI application IDs this test user can access
-
-    QuestionItem:
-      type: object
-      required:
-        - question
-      properties:
-        question:
-          type: string
-          description: The question text
-          example: "What is machine learning?"
-
-    AppIdItem:
-      type: object
-      required:
-        - ai_app_name
-      properties:
-        ai_app_name:
-          type: string
-          description: The AI application name
-          example: "ai_app_1"
+            type: string
+          description: List of AI application IDs for this use case
+          example: ["ai_app_1", "ai_app_2", "ai_app_3"]
 
     ErrorResponse:
       type: object
