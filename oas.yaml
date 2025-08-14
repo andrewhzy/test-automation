@@ -107,7 +107,7 @@ paths:
                 details:
                   request_id: "req-12345"
 
-  /answergeneration/allowlistconfig:
+  /answergeneration/allowlist:
     get:
       summary: Get allowed configuration
       description: Retrieve the complete allowed configuration including test operators, test users, questions, and application IDs

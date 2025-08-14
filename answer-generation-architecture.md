@@ -84,8 +84,8 @@ sequenceDiagram
 ### Request Format
 ```json
 {
-  "user": "target_user1",
-  "application_id": "chat_kb1",
+  "user": "target_user_1",
+  "application_id": "ai_app_1",
   "questions": [
     "What is machine learning?",
     "What is machine MCP?",
@@ -101,8 +101,8 @@ sequenceDiagram
   "test_id": "uuid-12345",
   "timestamp": "2024-01-01T00:00:00Z",
   "operated_by": "test_operator1",
-  "target_user_id": "target_user1",
-  "application_id": "chat_kb1",
+  "target_user_id": "target_user_1",
+  "application_id": "ai_app_1",
   "status": "completed",
   "results": [
     {
@@ -126,7 +126,7 @@ sequenceDiagram
 ### Test Operator Allowlist
 ```yaml
 answer_generation:
-    allowlist:
+  allowlist:
     - target_user_name: "target_user_1"
       questions:
         - question: "What is machine learning?"
