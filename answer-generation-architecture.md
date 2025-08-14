@@ -126,40 +126,52 @@ sequenceDiagram
 ### Test Operator Allowlist
 ```yaml
 answer_generation:
-  allowlist:
-    - target_user_name: "target_user_1"
+  usecases:
+    - id: usecase_id_1
+      users:
+        - user_1
+        - user_2
+        - user_3
       questions:
-        - question: "What is machine learning?"
-        - question: "How does neural network training work?"
-        - question: "What are the benefits of cloud computing?"
-        - question: "How do I reset my password?"
-        - question: "What is our company's mission statement?"
+        - What is machine learning?
+        - How does neural network training work?
+        - What are the benefits of cloud computing?
+        - How do I reset my password?
+        - What is our company's mission statement?
       ai_app_ids:
-        - ai_app_name: "ai_app_1"
-        - ai_app_name: "ai_app_2"
-        - ai_app_name: "ai_app_3"
-    - target_user_name: "target_user_2"
+        - ai_app_1
+        - ai_app_2
+        - ai_app_3
+    - id: usecase_id_2
+      users:
+        - user_1
+        - user_2
+        - user_3
       questions:
-        - question: "How do I update my profile settings?"
-        - question: "What are the system requirements for this software?"
-        - question: "Can you explain data privacy policies?"
-        - question: "How to troubleshoot connection issues?"
-        - question: "What integrations are available?"
+        - How do I update my profile settings?
+        - What are the system requirements for this software?
+        - Can you explain data privacy policies?
+        - How to troubleshoot connection issues?
+        - What integrations are available?
       ai_app_ids:
-        - ai_app_name: "ai_app_1"
-        - ai_app_name: "ai_app_2"
-        - ai_app_name: "ai_app_3"
-    - target_user_name: "target_user_3"
+        - ai_app_1
+        - ai_app_2
+        - ai_app_3
+    - id: usecase_id_3
+      users:
+        - user_1
+        - user_2
+        - user_3
       questions:
-        - question: "Show me sales analytics for Q4"
-        - question: "How to generate monthly reports?"
-        - question: "What are our top performing products?"
-        - question: "Can you analyze customer churn data?"
-        - question: "Export user engagement metrics"
+        - Show me sales analytics for Q4
+        - How to generate monthly reports?
+        - What are our top performing products?
+        - Can you analyze customer churn data?
+        - Export user engagement metrics
       ai_app_ids:
-        - ai_app_name: "ai_app_1"
-        - ai_app_name: "ai_app_2"
-        - ai_app_name: "ai_app_3"
+        - ai_app_1
+        - ai_app_2
+        - ai_app_3
 ```
 
 ## Security Considerations
